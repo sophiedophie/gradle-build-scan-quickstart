@@ -1,0 +1,122 @@
+/**
+ * This Gradle script captures data about the OS, IDE, CI, and Git and stores it in build scans via custom tags, custom links, and custom values.
+ *
+ * Proceed as following to benefit from this script in your Gradle build:
+ *
+ * - Copy this script to the root folder of your Gradle project, renaming it to 'build-scan-user-data.gradle'
+ * - Apply the Gradle build scan plugin in the root project's build.gradle(.kts) file
+ * - Make sure the build scan server is specified in the buildScan extension block
+ * - Include this script in the root project's build.gradle(.kts) file via `apply from: 'build-scan-user-data.gradle'`
+ * - Further customize this script to your needs
+ */
+
+tagOs()
+tagIde()
+tagCiOrLocal()
+addCiMetadata()
+addGitMetadata()
+
+void tagOs() {
+    buildScan.tag System.getProperty('os.name')
+}
+
+void tagIde() {
+    if (project.hasProperty('android.injected.invoked.from.ide')) {
+        buildScan.tag 'Android Studio'
+    } else if (System.getProperty('idea.version')) {
+        buildScan.tag 'IntelliJ IDEA'
+    } else if (System.getProperty('eclipse.buildId')) {
+        buildScan.tag 'Eclipse'
+    }
+}
+
+void tagCiOrLocal() {
+    buildScan.tag(isCi() ? 'CI' : 'LOCAL')
+}
+
+void addGitMetadata() {
+    buildScan.background {
+        def gitCommitId = execAndGetStdout('git', 'rev-parse', '--short=8', '--verify', 'HEAD')
+        def gitBranchName = execAndGetStdout('git', 'rev-parse', '--abbrev-ref', 'HEAD')
+        def gitStatus = execAndGetStdout('git', 'status', '--porcelain')
+
+        if(gitCommitId) {
+            def commitIdLabel = 'Git commit id'
+            value commitIdLabel, gitCommitId
+            link 'Git commit id build scans', customValueSearchUrl([(commitIdLabel): gitCommitId])
+        }
+        if (gitBranchName) {
+            tag gitBranchName
+            value 'Git branch', gitBranchName
+        }
+        if (gitStatus) {
+            tag 'Dirty'
+            value 'Git status', gitStatus
+        }
+    }
+}
+
+void addCiMetadata() {
+    // Jenkins
+    if (System.getenv('BUILD_URL')) {
+        buildScan.link 'Jenkins build', System.getenv('BUILD_URL')
+    }
+    if (System.getenv('BUILD_NUMBER')) {
+        buildScan.value 'CI build number', System.getenv('BUILD_NUMBER')
+    }
+    if (System.getenv('JOB_NAME')) {
+        def jobNameLabel = 'CI job'
+        def jobName = System.getenv('JOB_NAME')
+        buildScan.value jobNameLabel, jobName
+        buildScan.link 'CI job build scans', customValueSearchUrl([(jobNameLabel): jobName])
+    }
+    if (System.getenv('STAGE_NAME')) {
+        def stageNameLabel = 'CI stage'
+        def stageName = System.getenv('STAGE_NAME')
+        buildScan.value stageNameLabel, stageName
+        buildScan.link 'CI stage build scans', customValueSearchUrl([(stageNameLabel): stageName])
+    }
+
+    // Team City
+    if (System.getenv('CI_BUILD_URL')) {
+        buildScan.link 'TeamCity build', System.getenv('CI_BUILD_URL')
+    }
+
+    // Circle CI
+    if (System.getenv('CIRCLE_BUILD_URL')) {
+        buildScan.link 'CircleCI build', System.getenv('CIRCLE_BUILD_URL')
+    }
+
+    // Bamboo
+    if (System.getenv('bamboo.resultsUrl')) {
+        buildScan.link 'Bamboo build', System.getenv('bamboo.resultsUrl')
+    }
+}
+
+boolean isCi() {
+    System.getenv('BUILD_URL') ||        // Jenkins
+    System.getenv('CI_BUILD_URL') ||     // TeamCity
+    System.getenv('CIRCLE_BUILD_URL') || // CircleCI
+    System.getenv('bamboo.resultsUrl')   // Bamboo
+}
+
+String execAndGetStdout(String... args) {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine(args)
+        standardOutput = stdout
+    }
+    stdout.toString().trim()
+}
+
+String customValueSearchUrl(Map<String, String> search) {
+    def query = search.collect { name, value ->
+        "search.names=${encodeURL(name)}&search.values=${encodeURL(value)}"
+    }.join('&')
+
+    "$buildScan.server/scans?$query"
+}
+
+String encodeURL(String url){
+    URLEncoder.encode(url, 'UTF-8')
+}
