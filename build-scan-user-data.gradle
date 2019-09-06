@@ -94,18 +94,18 @@ void addCiMetadata() {
     if (System.getenv('bamboo_buildNumber')) {
         buildScan.value 'CI build number', System.getenv('bamboo_buildNumber')
     }
-    if (System.getenv('bamboo_buildPlanName')) {
+    if (System.getenv('bamboo_planName')) {
         def jobNameLabel = 'CI job'
-        def jobName = System.getenv('bamboo_buildPlanName')
+        def jobName = System.getenv('bamboo_planName')
         buildScan.value jobNameLabel, jobName
         buildScan.link 'CI job build scans', customValueSearchUrl([(jobNameLabel): jobName])
     }
-    /*if (System.getenv('STAGE_NAME')) {
+    if (System.getenv('bamboo_buildPlanName')) {
         def stageNameLabel = 'CI stage'
-        def stageName = System.getenv('STAGE_NAME')
+        def stageName = System.getenv('bamboo_buildPlanName')
         buildScan.value stageNameLabel, stageName
         buildScan.link 'CI stage build scans', customValueSearchUrl([(stageNameLabel): stageName])
-    }*/
+    }
 }
 
 boolean isCi() {
