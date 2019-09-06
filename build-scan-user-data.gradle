@@ -88,8 +88,8 @@ void addCiMetadata() {
     }
 
     // Bamboo
-    if (System.getenv('bamboo.resultsUrl')) {
-        buildScan.link 'Bamboo build', System.getenv('bamboo.resultsUrl')
+    if (System.getProperty('bamboo.resultsUrl')) {
+        buildScan.link 'Bamboo build', System.getProperty('bamboo.resultsUrl')
     }
 }
 
@@ -97,7 +97,7 @@ boolean isCi() {
     System.getenv('BUILD_URL') ||        // Jenkins
     System.getenv('CI_BUILD_URL') ||     // TeamCity
     System.getenv('CIRCLE_BUILD_URL') || // CircleCI
-    System.getenv('bamboo.resultsUrl')   // Bamboo
+    System.getProperty('bamboo.resultsUrl')   // Bamboo
 }
 
 String execAndGetStdout(String... args) {
