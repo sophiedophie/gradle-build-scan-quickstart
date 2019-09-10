@@ -4,8 +4,8 @@
  * Proceed as following to benefit from this script in your Gradle build:
  *
  * - Copy this script to the root folder of your Gradle project, renaming it to 'build-scan-user-data.gradle'
- * - Apply the Gradle build scan plugin in the root project's build.gradle(.kts) file
- * - Make sure the build scan server is specified in the buildScan extension block
+ * - Apply the Gradle Build Scan plugin
+ * - Point to your Gradle Enterprise server
  * - Include this script in the root project's build.gradle(.kts) file via `apply from: 'build-scan-user-data.gradle'`
  * - Further customize this script to your needs
  */
@@ -95,16 +95,16 @@ void addCiMetadata() {
         buildScan.value 'CI build number', System.getenv('bamboo_buildNumber')
     }
     if (System.getenv('bamboo_planName')) {
-        def jobNameLabel = 'CI job'
-        def jobName = System.getenv('bamboo_planName')
-        buildScan.value jobNameLabel, jobName
-        buildScan.link 'CI job build scans', customValueSearchUrl([(jobNameLabel): jobName])
+        def planNameLabel = 'CI plan'
+        def planName = System.getenv('bamboo_planName')
+        buildScan.value planNameLabel, planName
+        buildScan.link 'CI plan build scans', customValueSearchUrl([(planNameLabel): planName])
     }
     if (System.getenv('bamboo_buildPlanName')) {
-        def stageNameLabel = 'CI stage'
-        def stageName = System.getenv('bamboo_buildPlanName')
-        buildScan.value stageNameLabel, stageName
-        buildScan.link 'CI stage build scans', customValueSearchUrl([(stageNameLabel): stageName])
+        def jobNameLabel = 'CI job'
+        def jobName = System.getenv('bamboo_buildPlanName')
+        buildScan.value jobNameLabel, jobName
+        buildScan.link 'CI job build scans', customValueSearchUrl([(jobNameLabel): jobName])
     }
 }
 
