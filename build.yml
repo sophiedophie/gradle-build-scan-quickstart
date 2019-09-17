@@ -14,8 +14,4 @@ outputs:
   - name: build-output
 
 run:
-  path: sudo apt-get update
-run:
-  path: sudo apt-get install -y git
-run:
   path: source-code/build.sh
