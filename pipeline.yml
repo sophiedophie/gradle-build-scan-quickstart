@@ -1,20 +1,16 @@
 ---
 resources:
-  - name: source-code
+- name: source-code
   type: git
   source:
     uri: https://github.com/gradle/gradle-build-scan-quickstart
     branch: test
 
 jobs:
-  - name: job-hello-world
-    public: true
-    plan:
-      - task: hello-world
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source: {repository: busybox}
-          run:
-            path: build.sh
+- name: build
+  public: true
+  plan:
+  - get: source-code
+    trigger: true
+  - task: build
+    file: build.yml
