@@ -10,6 +10,9 @@
  * - Further customize this script to your needs
  */
 
+buildScan.server = 'https://e.grdev.net'
+buildScan.publishAlways()
+
 tagOs()
 tagIde()
 tagCiOrLocal()
@@ -44,6 +47,11 @@ void addGitMetadata() {
             def commitIdLabel = 'Git commit id'
             value commitIdLabel, gitCommitId
             link 'Git commit id build scans', customValueSearchUrl([(commitIdLabel): gitCommitId])
+            def originUrl = execAndGetStdout('git', 'config', '--get', 'remote.origin.url')
+            if(originUrl.contains('github.com')) { // only for GitHub
+                def repoPath = (originUrl =~ /(.*)github\.com[\/|:](.*).git/)[0][2]
+                link 'Github Source', "https://github.com/$repoPath/tree/" + gitCommitId
+            }
         }
         if (gitBranchName) {
             tag gitBranchName
