@@ -4,7 +4,7 @@ executors:
     macos:
       xcode: "10.2.0"
 jobs:
-  gradle/test:
+  gradle_test:
     executor: macos_executor
     shell: /bin/bash --login -eo pipefail
     steps:
@@ -23,5 +23,4 @@ workflows:
   version: 2
   macos:
     jobs:
-      - show_xcode_version:
-          context: test-context
+      - gradle_test
