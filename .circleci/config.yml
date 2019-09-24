@@ -1,0 +1,27 @@
+version: 2.1
+executors:
+  macos_executor:
+    macos:
+      xcode: "10.2.0"
+jobs:
+  gradle/test:
+    executor: macos_executor
+    shell: /bin/bash --login -eo pipefail
+    steps:
+      - restore_cache:
+          key: homebrew
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Update brew
+          command: brew update
+      - run:
+          name: Install Gradle
+          command: brew install Gradle
+
+workflows:
+  version: 2
+  macos:
+    jobs:
+      - show_xcode_version:
+          context: test-context
