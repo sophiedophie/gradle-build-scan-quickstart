@@ -20,7 +20,7 @@ jobs:
           command: brew install Gradle
       - run:
           name: Run test
-          command: gradle clean build -x test
+          command: gradle clean build
 
 workflows:
   version: 2
