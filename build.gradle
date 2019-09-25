@@ -4,6 +4,8 @@ plugins {
     id 'base'
 }
 
+apply plugin:'base'
+
 repositories {
     jcenter()
 }
